@@ -105,16 +105,16 @@ function AppShell() {
       case 'detail':
         return <Detail actions={workflowActions} />;
       case 'insights':
-        return <Insights actions={workflowActions} />;
+        return <Insights actions={workflowActions} tickets={state.tickets} />;
       case 'settings':
         return <Settings actions={settingsActions} />;
       case 'error-state':
-        return <ErrorState actions={workflowActions} />;
+        return <ErrorState actions={workflowActions} errorMessage={state.lastError} storageStatus={state.storageStatus} />;
       case 'empty-state':
-        return <EmptyState actions={workflowActions} />;
+        return <EmptyState actions={workflowActions} activeFilter={state.statusFilter} />;
       case 'dashboard':
       default:
-        return <Dashboard actions={dashboardActions} />;
+        return <Dashboard actions={dashboardActions} tickets={state.tickets} selectedTicketId={state.selectedTicketId} isPaused={state.isPaused} />;
     }
   };
 
