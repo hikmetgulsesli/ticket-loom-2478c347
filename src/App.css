@@ -1,0 +1,283 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  min-height: 100vh;
+  color: #172033;
+  background: #f6f8fb;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 28px 22px;
+  background: #10202f;
+  color: #f8fafc;
+}
+
+.eyebrow,
+.section-label {
+  margin: 0 0 6px;
+  color: #6b7a90;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.sidebar .eyebrow,
+.sidebar .section-label {
+  color: #9ec2d4;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.1;
+}
+
+.nav-list,
+.saved-views,
+.status-filters,
+.button-row {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-list,
+.saved-views {
+  flex-direction: column;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #172033;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+button:hover,
+button:focus-visible {
+  border-color: #2b6f8a;
+  outline: none;
+}
+
+.sidebar button {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #eff6ff;
+  background: rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+button.active,
+.sidebar button.active {
+  border-color: #2f8f83;
+  background: #d9f4ec;
+  color: #12312d;
+}
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.status-filters {
+  flex-wrap: wrap;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.metrics article,
+.detail-panel,
+.form-panel,
+.generated-screen {
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.metrics article {
+  padding: 16px;
+}
+
+.metrics span {
+  display: block;
+  color: #5f6f84;
+}
+
+.metrics strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 2rem;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1.1fr);
+  gap: 18px;
+}
+
+.ticket-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ticket-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 72px;
+  text-align: left;
+}
+
+.ticket-row span {
+  display: grid;
+  gap: 5px;
+}
+
+.ticket-row small {
+  align-self: start;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #e9eef5;
+  text-transform: capitalize;
+}
+
+.ticket-row.selected {
+  border-color: #2b6f8a;
+  background: #eaf6fa;
+}
+
+.detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+}
+
+.detail-panel p {
+  color: #516176;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+dt {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.form-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+  padding: 16px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: #516176;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #172033;
+  background: #ffffff;
+}
+
+textarea {
+  min-height: 42px;
+  resize: vertical;
+}
+
+.empty-panel,
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+  padding: 18px;
+  background: #ffffff;
+}
+
+.error-banner {
+  border-color: #d46a6a;
+  background: #fff4f2;
+}
+
+.generated-screen {
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .app-shell,
+  .content-grid,
+  .form-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}
