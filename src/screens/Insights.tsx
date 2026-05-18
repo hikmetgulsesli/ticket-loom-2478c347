@@ -18,10 +18,17 @@ export interface InsightsProps {
 }
 
 export function Insights({ actions, tickets = [] }: InsightsProps) {
-  const openCount = tickets.filter((ticket) => ticket.status === "open").length;
-  const pendingCount = tickets.filter((ticket) => ticket.status === "pending").length;
-  const resolvedCount = tickets.filter((ticket) => ticket.status === "resolved").length;
-  const highPriorityCount = tickets.filter((ticket) => ticket.priority === "high").length;
+  const { openCount, pendingCount, resolvedCount, highPriorityCount } = tickets.reduce(
+    (acc, ticket) => {
+      if (ticket.status === "open") acc.openCount++;
+      else if (ticket.status === "pending") acc.pendingCount++;
+      else if (ticket.status === "resolved") acc.resolvedCount++;
+
+      if (ticket.priority === "high") acc.highPriorityCount++;
+      return acc;
+    },
+    { openCount: 0, pendingCount: 0, resolvedCount: 0, highPriorityCount: 0 }
+  );
 
   return (
     <>

@@ -20,11 +20,18 @@ export interface DashboardProps {
 }
 
 export function Dashboard({ actions, tickets = [], selectedTicketId = null, isPaused = false }: DashboardProps) {
-  const openCount = tickets.filter((ticket) => ticket.status === "open").length;
-  const pendingCount = tickets.filter((ticket) => ticket.status === "pending").length;
-  const resolvedCount = tickets.filter((ticket) => ticket.status === "resolved").length;
+  const { openCount, pendingCount, resolvedCount } = tickets.reduce(
+    (acc, ticket) => {
+      if (ticket.status === "open") acc.openCount++;
+      else if (ticket.status === "pending") acc.pendingCount++;
+      else if (ticket.status === "resolved") acc.resolvedCount++;
+
+      return acc;
+    },
+    { openCount: 0, pendingCount: 0, resolvedCount: 0 }
+  );
   const selectedTicket = tickets.find((ticket) => ticket.id === selectedTicketId) ?? tickets[0];
-  const activeCells = tickets.length ? tickets.map((ticket, index) => (ticket.status === "open" || ticket.id === selectedTicket?.id ? index : -1)) : [0];
+  const activeIndices = new Set(tickets.map((ticket, index) => (ticket.status === "open" || ticket.id === selectedTicket?.id ? index : -1)));
 
   return (
     <>
@@ -34,7 +41,7 @@ export function Dashboard({ actions, tickets = [], selectedTicketId = null, isPa
         </header>
         <main id="fallback-dashboard">
             <section className="game-layout" aria-label="Playable board reference">
-              <div className="board" role="grid" aria-label="Ticket queue activity">{Array.from({ length: 96 }, (_, index) => <div key={index} className={activeCells.includes(index % Math.max(tickets.length, 1)) ? "cell active" : "cell"} aria-hidden={true}></div>)}</div>
+              <div className="board" role="grid" aria-label="Ticket queue activity">{Array.from({ length: 96 }, (_, index) => <div key={index} className={tickets.length > 0 && activeIndices.has(index % tickets.length) ? "cell active" : "cell"} aria-hidden={true}></div>)}</div>
               <aside className="side-panel">
                 <h2>{selectedTicket?.id ?? "No tickets"}</h2>
                 <div className="mini-grid" aria-label="Ticket status preview"><span className={openCount ? "active" : ""}></span><span className={pendingCount ? "active" : ""}></span><span className={resolvedCount ? "active" : ""}></span><span className={isPaused ? "active" : ""}></span><span className=""></span><span className="active"></span><span className=""></span><span className=""></span><span className=""></span><span className=""></span><span className="active"></span><span className=""></span><span className=""></span><span className=""></span><span className=""></span><span className="active"></span></div>
