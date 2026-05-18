@@ -30,9 +30,6 @@ export interface AppSettings {
   density: 'comfortable' | 'compact';
   theme: 'light' | 'system';
   defaultAssignee: string;
-  startLevel: 'level-1' | 'level-5';
-  assistHints: 'on' | 'off';
-  controls: string;
 }
 
 export interface TicketDraft {
@@ -46,6 +43,7 @@ export interface AppState {
   activeView: AppView;
   tickets: Ticket[];
   selectedTicketId: string | null;
+  editingTicketId: string | null;
   statusFilter: TicketStatus | 'all';
   savedViews: SavedView[];
   settings: AppSettings;
@@ -62,7 +60,10 @@ export interface AppActions {
   selectTicket: (ticketId: string) => void;
   setStatusFilter: (status: TicketStatus | 'all') => void;
   updateDraft: (draft: Partial<TicketDraft>) => void;
+  saveDraftTicket: () => void;
   createTicket: () => void;
+  editTicket: (ticketId: string) => void;
+  cancelEdit: () => void;
   updateTicketStatus: (ticketId: string, status: TicketStatus) => void;
   pauseQueue: () => void;
   restartQueue: () => void;

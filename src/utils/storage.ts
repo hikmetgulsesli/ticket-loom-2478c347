@@ -45,6 +45,7 @@ export function saveStoredState(state: AppState): StorageStatus {
     ...state,
     activeView: state.activeView,
     activePanel: 'none',
+    editingTicketId: null,
     itemCount: state.tickets.length,
     lastError: null,
   };

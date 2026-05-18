@@ -46,9 +46,6 @@ const defaultSettings: AppSettings = {
   density: 'comfortable',
   theme: 'light',
   defaultAssignee: 'Avery',
-  startLevel: 'level-1',
-  assistHints: 'on',
-  controls: 'Arrow keys',
 };
 
 function getNextTicketId(tickets: Ticket[]) {
@@ -64,6 +61,7 @@ export const defaultState: AppState = {
   activeView: 'dashboard',
   tickets: initialTickets,
   selectedTicketId: initialTickets[0]?.id ?? null,
+  editingTicketId: null,
   statusFilter: 'all',
   savedViews: [
     { id: 'open-priority', label: 'Open priority', status: 'open' },
@@ -91,6 +89,7 @@ function createInitialState(): AppState {
     settings: { ...defaultSettings, ...storedState.state?.settings },
     storageStatus: storedState.status,
     activePanel: 'none',
+    editingTicketId: null,
     itemCount: tickets.length,
   };
 }
@@ -133,10 +132,35 @@ export function useAppState() {
     setState((current) => ({ ...current, draft: { ...current.draft, ...draft } }));
   }, []);
 
-  const createTicket = useCallback(() => {
+  const saveDraftTicket = useCallback(() => {
     setState((current) => {
       if (!current.draft.title.trim() || !current.draft.requester.trim()) {
         return { ...current, activeView: 'error-state', lastError: 'A title and requester are required before a ticket can be created.' };
+      }
+
+      if (current.editingTicketId) {
+        return {
+          ...current,
+          tickets: current.tickets.map((ticket) =>
+            ticket.id === current.editingTicketId
+              ? {
+                  ...ticket,
+                  title: current.draft.title.trim(),
+                  requester: current.draft.requester.trim(),
+                  summary: current.draft.summary.trim() || 'No summary provided yet.',
+                  priority: current.draft.priority,
+                  updatedAt: 'Now',
+                }
+              : ticket,
+          ),
+          selectedTicketId: current.editingTicketId,
+          editingTicketId: null,
+          draft: defaultDraft,
+          activeView: 'detail',
+          activePanel: 'none',
+          itemCount: current.tickets.length,
+          lastError: null,
+        };
       }
 
       const nextTicket: Ticket = {
@@ -154,6 +178,7 @@ export function useAppState() {
         ...current,
         tickets: [nextTicket, ...current.tickets],
         selectedTicketId: nextTicket.id,
+        editingTicketId: null,
         draft: defaultDraft,
         activeView: 'detail',
         activePanel: 'none',
@@ -161,6 +186,53 @@ export function useAppState() {
         lastError: null,
       };
     });
+  }, []);
+
+  const createTicket = useCallback(() => {
+    setState((current) => ({
+      ...current,
+      activeView: 'create-edit',
+      activePanel: 'none',
+      editingTicketId: null,
+      draft: defaultDraft,
+      lastError: null,
+    }));
+  }, []);
+
+  const editTicket = useCallback((ticketId: string) => {
+    setState((current) => {
+      const ticket = current.tickets.find((item) => item.id === ticketId);
+
+      if (!ticket) {
+        return { ...current, activeView: 'error-state', lastError: 'The selected ticket could not be found.' };
+      }
+
+      return {
+        ...current,
+        activeView: 'create-edit',
+        activePanel: 'none',
+        selectedTicketId: ticket.id,
+        editingTicketId: ticket.id,
+        draft: {
+          title: ticket.title,
+          requester: ticket.requester,
+          summary: ticket.summary,
+          priority: ticket.priority,
+        },
+        lastError: null,
+      };
+    });
+  }, []);
+
+  const cancelEdit = useCallback(() => {
+    setState((current) => ({
+      ...current,
+      activeView: current.selectedTicketId ? 'detail' : 'dashboard',
+      activePanel: 'none',
+      editingTicketId: null,
+      draft: defaultDraft,
+      lastError: null,
+    }));
   }, []);
 
   const updateTicketStatus = useCallback((ticketId: string, status: TicketStatus) => {
@@ -234,7 +306,10 @@ export function useAppState() {
       selectTicket,
       setStatusFilter,
       updateDraft,
+      saveDraftTicket,
       createTicket,
+      editTicket,
+      cancelEdit,
       updateTicketStatus,
       pauseQueue,
       restartQueue,
@@ -251,12 +326,15 @@ export function useAppState() {
       clearError,
       closePanel,
       createTicket,
+      cancelEdit,
       navigate,
+      editTicket,
       openAccountPanel,
       pauseQueue,
       resetDefaults,
       restartQueue,
       retryStorage,
+      saveDraftTicket,
       saveSettings,
       selectTicket,
       setStatusFilter,
