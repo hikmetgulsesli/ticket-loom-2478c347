@@ -8,13 +8,17 @@
 // 4. Replace placeholder data with props/state
 
 
+import type { AppSettings } from '../types/domain';
+
 export type SettingsActionId = "save-settings-1" | "reset-defaults-2" | "dashboard-1" | "create-edit-2" | "detail-3" | "insights-4" | "settings-5" | "error-state-6" | "empty-state-7";
 
 export interface SettingsProps {
   actions?: Partial<Record<SettingsActionId, () => void>>;
+  settings?: AppSettings;
+  onSettingsChange?: (settings: Partial<AppSettings>) => void;
 }
 
-export function Settings({ actions }: SettingsProps) {
+export function Settings({ actions, settings, onSettingsChange }: SettingsProps) {
   return (
     <>
       <header>
@@ -23,9 +27,9 @@ export function Settings({ actions }: SettingsProps) {
         </header>
         <main id="fallback-settings">
             <form className="settings-panel">
-              <label>Start Level <select name="level"><option>Level 1</option><option>Level 5</option></select></label>
-              <label>Assist Hints <select name="assist"><option>On</option><option>Off</option></select></label>
-              <label>Controls <input name="controls" placeholder="Arrow keys, WASD, or touch" /></label>
+              <label>Start Level <select name="level" value={settings?.startLevel ?? 'level-1'} onChange={(event) => onSettingsChange?.({ startLevel: event.target.value as AppSettings['startLevel'] })}><option value="level-1">Level 1</option><option value="level-5">Level 5</option></select></label>
+              <label>Assist Hints <select name="assist" value={settings?.assistHints ?? 'on'} onChange={(event) => onSettingsChange?.({ assistHints: event.target.value as AppSettings['assistHints'] })}><option value="on">On</option><option value="off">Off</option></select></label>
+              <label>Controls <input name="controls" placeholder="Arrow keys, WASD, or touch" value={settings?.controls ?? ''} onChange={(event) => onSettingsChange?.({ controls: event.target.value })} /></label>
               <button type="button" data-action-id="save-settings-1" onClick={actions?.["save-settings-1"]}>Save Settings</button><button type="button" data-action-id="reset-defaults-2" onClick={actions?.["reset-defaults-2"]}>Reset Defaults</button>
             </form></main>
     </>
