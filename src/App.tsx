@@ -61,9 +61,15 @@ function AppShell() {
     }
   };
 
+  const confirmRestartQueue = () => {
+    if (window.confirm('Restart the queue? This clears the current tickets and resets the workspace.')) {
+      actions.restartQueue();
+    }
+  };
+
   const dashboardActions: Partial<Record<DashboardActionId, () => void>> = {
     'pause-1': actions.pauseQueue,
-    'restart-2': actions.restartQueue,
+    'restart-2': confirmRestartQueue,
     'dashboard-1': () => navigateFromGenerated('dashboard-1'),
     'create-edit-2': () => navigateFromGenerated('create-edit-2'),
     'detail-3': () => navigateFromGenerated('detail-3'),
