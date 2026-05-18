@@ -119,7 +119,7 @@ function AppShell() {
   };
 
   return (
-    <main data-setfarm-root="ticket-loom" className="app-shell">
+    <div data-setfarm-root="ticket-loom" className="app-shell">
       <aside className="sidebar" aria-label="Ticket Loom navigation">
         <div>
           <p className="eyebrow">Ticket Loom</p>
@@ -341,11 +341,11 @@ function AppShell() {
           </aside>
         ) : null}
 
-        <section className="generated-screen" aria-hidden="true">
+        <section className="generated-screen" aria-label={`${viewLabels[state.activeView]} screen`}>
           {renderGeneratedScreen()}
         </section>
       </section>
-    </main>
+    </div>
   );
 }
 

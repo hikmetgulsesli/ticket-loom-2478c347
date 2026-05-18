@@ -48,6 +48,15 @@ const defaultSettings: AppSettings = {
   defaultAssignee: 'Avery',
 };
 
+function getNextTicketId(tickets: Ticket[]) {
+  const highestTicketNumber = tickets.reduce((highest, ticket) => {
+    const match = /^TL-(\d+)$/.exec(ticket.id);
+    return match ? Math.max(highest, Number(match[1])) : highest;
+  }, 1042);
+
+  return `TL-${highestTicketNumber + 1}`;
+}
+
 export const defaultState: AppState = {
   activeView: 'dashboard',
   tickets: initialTickets,
@@ -128,7 +137,7 @@ export function useAppState() {
       }
 
       const nextTicket: Ticket = {
-        id: `TL-${1043 + current.tickets.length}`,
+        id: getNextTicketId(current.tickets),
         title: current.draft.title.trim(),
         requester: current.draft.requester.trim(),
         summary: current.draft.summary.trim() || 'No summary provided yet.',
