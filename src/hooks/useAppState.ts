@@ -46,6 +46,9 @@ const defaultSettings: AppSettings = {
   density: 'comfortable',
   theme: 'light',
   defaultAssignee: 'Avery',
+  startLevel: 'level-1',
+  assistHints: 'on',
+  controls: 'Arrow keys',
 };
 
 function getNextTicketId(tickets: Ticket[]) {

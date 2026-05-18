@@ -30,6 +30,9 @@ export interface AppSettings {
   density: 'comfortable' | 'compact';
   theme: 'light' | 'system';
   defaultAssignee: string;
+  startLevel: 'level-1' | 'level-5';
+  assistHints: 'on' | 'off';
+  controls: string;
 }
 
 export interface TicketDraft {
