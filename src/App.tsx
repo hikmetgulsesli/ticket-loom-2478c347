@@ -81,8 +81,34 @@ function AppShell() {
 
   const workflowActions: Partial<Record<CreateEditActionId | DetailActionId | InsightsActionId | ErrorStateActionId | EmptyStateActionId, () => void>> = {
     'start-game-1': actions.createTicket,
-    'resume-2': () => actions.navigate('dashboard'),
+    'resume-2': actions.cancelEdit,
     'open-settings-3': () => actions.navigate('settings'),
+    'dashboard-1': () => navigateFromGenerated('dashboard-1'),
+    'create-edit-2': () => navigateFromGenerated('create-edit-2'),
+    'detail-3': () => navigateFromGenerated('detail-3'),
+    'insights-4': () => navigateFromGenerated('insights-4'),
+    'settings-5': () => navigateFromGenerated('settings-5'),
+    'error-state-6': () => navigateFromGenerated('error-state-6'),
+    'empty-state-7': () => navigateFromGenerated('empty-state-7'),
+  };
+
+  const createEditActions: Partial<Record<CreateEditActionId, () => void>> = {
+    'start-game-1': actions.saveDraftTicket,
+    'resume-2': actions.cancelEdit,
+    'open-settings-3': () => actions.navigate('settings'),
+    'dashboard-1': () => navigateFromGenerated('dashboard-1'),
+    'create-edit-2': () => navigateFromGenerated('create-edit-2'),
+    'detail-3': () => navigateFromGenerated('detail-3'),
+    'insights-4': () => navigateFromGenerated('insights-4'),
+    'settings-5': () => navigateFromGenerated('settings-5'),
+    'error-state-6': () => navigateFromGenerated('error-state-6'),
+    'empty-state-7': () => navigateFromGenerated('empty-state-7'),
+  };
+
+  const detailActions: Partial<Record<DetailActionId, () => void>> = {
+    'start-game-1': selectedTicket ? () => actions.editTicket(selectedTicket.id) : actions.createTicket,
+    'resume-2': selectedTicket ? () => actions.updateTicketStatus(selectedTicket.id, 'pending') : undefined,
+    'open-settings-3': selectedTicket ? () => actions.updateTicketStatus(selectedTicket.id, 'resolved') : undefined,
     'dashboard-1': () => navigateFromGenerated('dashboard-1'),
     'create-edit-2': () => navigateFromGenerated('create-edit-2'),
     'detail-3': () => navigateFromGenerated('detail-3'),
@@ -107,13 +133,20 @@ function AppShell() {
   const renderGeneratedScreen = () => {
     switch (state.activeView) {
       case 'create-edit':
-        return <CreateEdit actions={workflowActions} />;
+        return (
+          <CreateEdit
+            actions={createEditActions}
+            draft={state.draft}
+            editingTicketId={state.editingTicketId}
+            onDraftChange={actions.updateDraft}
+          />
+        );
       case 'detail':
-        return <Detail actions={workflowActions} />;
+        return <Detail actions={detailActions} ticket={selectedTicket} />;
       case 'insights':
         return <Insights actions={workflowActions} />;
       case 'settings':
-        return <Settings actions={settingsActions} settings={state.settings} onSettingsChange={actions.saveSettings} />;
+        return <Settings actions={settingsActions} />;
       case 'error-state':
         return <ErrorState actions={workflowActions} />;
       case 'empty-state':
@@ -272,6 +305,9 @@ function AppShell() {
                   <button type="button" onClick={() => actions.updateTicketStatus(selectedTicket.id, 'resolved')}>
                     Resolve
                   </button>
+                  <button type="button" onClick={() => actions.editTicket(selectedTicket.id)}>
+                    Edit
+                  </button>
                 </div>
               </>
             ) : (
@@ -306,8 +342,8 @@ function AppShell() {
             Summary
             <textarea value={state.draft.summary} onChange={(event) => actions.updateDraft({ summary: event.target.value })} />
           </label>
-          <button type="button" onClick={actions.createTicket}>
-            Save ticket
+          <button type="button" onClick={actions.saveDraftTicket}>
+            {state.editingTicketId ? 'Update ticket' : 'Save ticket'}
           </button>
         </section>
 
