@@ -63,7 +63,11 @@ function AppShell() {
 
   const dashboardActions: Partial<Record<DashboardActionId, () => void>> = {
     'pause-1': actions.pauseQueue,
-    'restart-2': actions.restartQueue,
+    'restart-2': () => {
+      if (window.confirm('Restart the queue? This clears current ticket changes and restores the default dashboard.')) {
+        actions.restartQueue();
+      }
+    },
     'dashboard-1': () => navigateFromGenerated('dashboard-1'),
     'create-edit-2': () => navigateFromGenerated('create-edit-2'),
     'detail-3': () => navigateFromGenerated('detail-3'),
