@@ -46,7 +46,8 @@ h3 {
 .nav-list,
 .saved-views,
 .status-filters,
-.button-row {
+.button-row,
+.topbar-actions {
   display: flex;
   gap: 8px;
 }
@@ -64,6 +65,10 @@ textarea {
 }
 
 button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   border: 1px solid #cfd8e3;
   border-radius: 8px;
   padding: 10px 12px;
@@ -78,7 +83,14 @@ button:focus-visible {
   outline: none;
 }
 
+.icon-button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+}
+
 .sidebar button {
+  justify-content: flex-start;
   border-color: rgba(255, 255, 255, 0.15);
   color: #eff6ff;
   background: rgba(255, 255, 255, 0.06);
@@ -108,6 +120,43 @@ button.active,
 
 .status-filters {
   flex-wrap: wrap;
+}
+
+.topbar-actions {
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.storage-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: #ffffff;
+}
+
+.storage-status.saved {
+  border-color: #9dd4bd;
+  background: #f0fbf6;
+}
+
+.storage-status.cleared,
+.storage-status.retrying {
+  border-color: #b9c8dc;
+  background: #f7faff;
+}
+
+.storage-status.attention {
+  border-color: #d46a6a;
+  background: #fff4f2;
+}
+
+.storage-status span {
+  color: #334155;
 }
 
 .metrics {
@@ -241,7 +290,8 @@ textarea {
 }
 
 .empty-panel,
-.error-banner {
+.error-banner,
+.account-panel {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -255,6 +305,27 @@ textarea {
 .error-banner {
   border-color: #d46a6a;
   background: #fff4f2;
+}
+
+.account-panel {
+  position: relative;
+  align-items: flex-start;
+  padding-right: 70px;
+}
+
+.account-panel p {
+  margin-bottom: 0;
+  color: #516176;
+}
+
+.account-panel dl {
+  min-width: 300px;
+}
+
+.account-panel .close-button {
+  position: absolute;
+  top: 14px;
+  right: 14px;
 }
 
 .generated-screen {
@@ -277,7 +348,24 @@ textarea {
     flex-direction: column;
   }
 
+  .topbar-actions,
+  .storage-status,
+  .account-panel {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
   .metrics {
     grid-template-columns: 1fr;
+  }
+
+  .account-panel {
+    box-sizing: border-box;
+    padding-right: 18px;
+  }
+
+  .account-panel dl {
+    min-width: 0;
   }
 }

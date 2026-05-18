@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AppActions, AppSettings, AppState, AppView, Ticket, TicketDraft, TicketStatus } from '../types/domain';
-import { clearStoredState, loadStoredState, saveStoredState } from '../utils/storage';
+import { clearStoredState, idleStorageStatus, loadStoredState, saveStoredState } from '../utils/storage';
 
 const initialTickets: Ticket[] = [
   {
@@ -61,37 +61,60 @@ export const defaultState: AppState = {
   settings: defaultSettings,
   draft: defaultDraft,
   lastError: null,
+  storageStatus: idleStorageStatus,
+  activePanel: 'none',
+  itemCount: initialTickets.length,
   isPaused: false,
 };
 
 function createInitialState(): AppState {
   const storedState = loadStoredState();
+  const tickets = storedState.state?.tickets ?? defaultState.tickets;
 
   return {
     ...defaultState,
-    ...storedState,
-    draft: { ...defaultDraft, ...storedState?.draft },
-    settings: { ...defaultSettings, ...storedState?.settings },
+    ...storedState.state,
+    tickets,
+    draft: { ...defaultDraft, ...storedState.state?.draft },
+    settings: { ...defaultSettings, ...storedState.state?.settings },
+    storageStatus: storedState.status,
+    activePanel: 'none',
+    itemCount: tickets.length,
   };
 }
 
 export function useAppState() {
   const [state, setState] = useState<AppState>(createInitialState);
+  const skipNextSave = useRef(false);
 
   useEffect(() => {
-    saveStoredState(state);
+    if (skipNextSave.current) {
+      skipNextSave.current = false;
+      return;
+    }
+
+    if (state.storageStatus.kind === 'corrupted') {
+      return;
+    }
+
+    const storageStatus = saveStoredState(state);
+    setState((current) =>
+      current.storageStatus.kind === storageStatus.kind && current.storageStatus.message === storageStatus.message
+        ? current
+        : { ...current, storageStatus },
+    );
   }, [state]);
 
   const navigate = useCallback((view: AppView) => {
-    setState((current) => ({ ...current, activeView: view, lastError: null }));
+    setState((current) => ({ ...current, activeView: view, activePanel: 'none', lastError: null }));
   }, []);
 
   const selectTicket = useCallback((ticketId: string) => {
-    setState((current) => ({ ...current, selectedTicketId: ticketId, activeView: 'detail', lastError: null }));
+    setState((current) => ({ ...current, selectedTicketId: ticketId, activeView: 'detail', activePanel: 'none', lastError: null }));
   }, []);
 
   const setStatusFilter = useCallback((status: TicketStatus | 'all') => {
-    setState((current) => ({ ...current, statusFilter: status, activeView: 'dashboard' }));
+    setState((current) => ({ ...current, statusFilter: status, activeView: 'dashboard', activePanel: 'none' }));
   }, []);
 
   const updateDraft = useCallback((draft: Partial<TicketDraft>) => {
@@ -121,6 +144,8 @@ export function useAppState() {
         selectedTicketId: nextTicket.id,
         draft: defaultDraft,
         activeView: 'detail',
+        activePanel: 'none',
+        itemCount: current.tickets.length + 1,
         lastError: null,
       };
     });
@@ -130,6 +155,7 @@ export function useAppState() {
     setState((current) => ({
       ...current,
       tickets: current.tickets.map((ticket) => (ticket.id === ticketId ? { ...ticket, status, updatedAt: 'Now' } : ticket)),
+      itemCount: current.tickets.length,
     }));
   }, []);
 
@@ -138,8 +164,9 @@ export function useAppState() {
   }, []);
 
   const restartQueue = useCallback(() => {
-    setState((current) => ({ ...defaultState, tickets: initialTickets, isPaused: false }));
-    clearStoredState();
+    const storageStatus = clearStoredState();
+    skipNextSave.current = true;
+    setState((current) => ({ ...defaultState, tickets: initialTickets, itemCount: initialTickets.length, storageStatus, isPaused: false }));
   }, []);
 
   const saveSettings = useCallback((settings?: Partial<AppSettings>) => {
@@ -147,6 +174,7 @@ export function useAppState() {
       ...current,
       settings: { ...current.settings, ...settings },
       activeView: 'settings',
+      activePanel: 'none',
       lastError: null,
     }));
   }, []);
@@ -157,6 +185,35 @@ export function useAppState() {
 
   const clearError = useCallback(() => {
     setState((current) => ({ ...current, lastError: null, activeView: 'dashboard' }));
+  }, []);
+
+  const openAccountPanel = useCallback(() => {
+    setState((current) => ({ ...current, activePanel: 'account' }));
+  }, []);
+
+  const closePanel = useCallback(() => {
+    setState((current) => ({ ...current, activePanel: 'none' }));
+  }, []);
+
+  const retryStorage = useCallback(() => {
+    setState((current) => ({
+      ...current,
+      storageStatus: { kind: 'retrying', message: 'Retrying browser storage sync.' },
+      lastError: null,
+    }));
+  }, []);
+
+  const clearData = useCallback(() => {
+    const storageStatus = clearStoredState();
+    skipNextSave.current = true;
+    setState(() => ({
+      ...defaultState,
+      tickets: initialTickets,
+      itemCount: initialTickets.length,
+      storageStatus,
+      activePanel: 'none',
+      isPaused: false,
+    }));
   }, []);
 
   const actions: AppActions = useMemo(
@@ -172,8 +229,28 @@ export function useAppState() {
       saveSettings,
       resetDefaults,
       clearError,
+      openAccountPanel,
+      closePanel,
+      retryStorage,
+      clearData,
     }),
-    [clearError, createTicket, navigate, pauseQueue, resetDefaults, restartQueue, saveSettings, selectTicket, setStatusFilter, updateDraft, updateTicketStatus],
+    [
+      clearData,
+      clearError,
+      closePanel,
+      createTicket,
+      navigate,
+      openAccountPanel,
+      pauseQueue,
+      resetDefaults,
+      restartQueue,
+      retryStorage,
+      saveSettings,
+      selectTicket,
+      setStatusFilter,
+      updateDraft,
+      updateTicketStatus,
+    ],
   );
 
   return { state, actions };

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { RotateCcw, Trash2, UserCircle, X } from 'lucide-react';
 import { AppProvider, useAppContext } from './contexts/AppContext';
 import type { AppView, TicketStatus } from './types/domain';
 import {
@@ -46,6 +47,7 @@ function AppShell() {
   const openCount = state.tickets.filter((ticket) => ticket.status === 'open').length;
   const pendingCount = state.tickets.filter((ticket) => ticket.status === 'pending').length;
   const resolvedCount = state.tickets.filter((ticket) => ticket.status === 'resolved').length;
+  const storageTone = state.storageStatus.kind === 'error' || state.storageStatus.kind === 'corrupted' ? 'attention' : state.storageStatus.kind;
 
   useEffect(() => {
     window.app = { state, actions };
@@ -151,19 +153,47 @@ function AppShell() {
             <p className="eyebrow">{state.isPaused ? 'Queue paused' : 'Live queue'}</p>
             <h2>{viewLabels[state.activeView]}</h2>
           </div>
-          <div className="status-filters" aria-label="Status filters">
-            {(['all', 'open', 'pending', 'resolved'] as Array<TicketStatus | 'all'>).map((status) => (
-              <button
-                key={status}
-                type="button"
-                className={state.statusFilter === status ? 'active' : ''}
-                onClick={() => actions.setStatusFilter(status)}
-              >
-                {status}
-              </button>
-            ))}
+          <div className="topbar-actions">
+            <div className="status-filters" aria-label="Status filters">
+              {(['all', 'open', 'pending', 'resolved'] as Array<TicketStatus | 'all'>).map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  className={state.statusFilter === status ? 'active' : ''}
+                  onClick={() => actions.setStatusFilter(status)}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="icon-button"
+              aria-label="Open account panel"
+              title="Open account panel"
+              onClick={actions.openAccountPanel}
+            >
+              <UserCircle size={20} aria-hidden="true" />
+            </button>
           </div>
         </header>
+
+        <section className={`storage-status ${storageTone}`} aria-live="polite">
+          <div>
+            <p className="section-label">Browser storage</p>
+            <span>{state.storageStatus.message}</span>
+          </div>
+          <div className="button-row">
+            <button type="button" onClick={actions.retryStorage}>
+              <RotateCcw size={16} aria-hidden="true" />
+              Retry
+            </button>
+            <button type="button" onClick={actions.clearData}>
+              <Trash2 size={16} aria-hidden="true" />
+              Clear data
+            </button>
+          </div>
+        </section>
 
         <section className="metrics" aria-label="Queue metrics">
           <article>
@@ -282,6 +312,33 @@ function AppShell() {
               Dismiss
             </button>
           </section>
+        ) : null}
+
+        {state.activePanel === 'account' ? (
+          <aside className="account-panel" aria-label="Account panel">
+            <div>
+              <p className="eyebrow">Account</p>
+              <h3>Avery Rivera</h3>
+              <p>Default assignee for new Ticket Loom workspaces.</p>
+            </div>
+            <dl>
+              <div>
+                <dt>Active screen</dt>
+                <dd>{viewLabels[state.activeView]}</dd>
+              </div>
+              <div>
+                <dt>Selected item</dt>
+                <dd>{state.selectedTicketId ?? 'None'}</dd>
+              </div>
+              <div>
+                <dt>Item count</dt>
+                <dd>{state.itemCount}</dd>
+              </div>
+            </dl>
+            <button type="button" className="icon-button close-button" aria-label="Close account panel" title="Close account panel" onClick={actions.closePanel}>
+              <X size={20} aria-hidden="true" />
+            </button>
+          </aside>
         ) : null}
 
         <section className="generated-screen" aria-hidden="true">
