@@ -42,6 +42,8 @@ const defaultDraft: TicketDraft = {
   priority: 'medium',
 };
 
+const defaultTicketSummary = 'No summary provided yet.';
+
 const defaultSettings: AppSettings = {
   density: 'comfortable',
   theme: 'light',
@@ -50,6 +52,10 @@ const defaultSettings: AppSettings = {
   assistHints: 'on',
   controls: 'keyboard',
 };
+
+function getCurrentTimeLabel() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
 
 function getNextTicketId(tickets: Ticket[]) {
   const highestTicketNumber = tickets.reduce((highest, ticket) => {
@@ -138,7 +144,7 @@ export function useAppState() {
   const saveDraftTicket = useCallback(() => {
     setState((current) => {
       if (!current.draft.title.trim() || !current.draft.requester.trim()) {
-        return { ...current, activeView: 'error-state', lastError: 'A title and requester are required before a ticket can be created.' };
+        return { ...current, activeView: 'error-state', lastError: 'A title and requester are required before a ticket can be saved.' };
       }
 
       if (current.editingTicketId) {
@@ -150,9 +156,9 @@ export function useAppState() {
                   ...ticket,
                   title: current.draft.title.trim(),
                   requester: current.draft.requester.trim(),
-                  summary: current.draft.summary.trim() || 'No summary provided yet.',
+                  summary: current.draft.summary.trim() || defaultTicketSummary,
                   priority: current.draft.priority,
-                  updatedAt: 'Now',
+                  updatedAt: getCurrentTimeLabel(),
                 }
               : ticket,
           ),
@@ -170,11 +176,11 @@ export function useAppState() {
         id: getNextTicketId(current.tickets),
         title: current.draft.title.trim(),
         requester: current.draft.requester.trim(),
-        summary: current.draft.summary.trim() || 'No summary provided yet.',
+        summary: current.draft.summary.trim() || defaultTicketSummary,
         priority: current.draft.priority,
         status: 'open',
         assignee: current.settings.defaultAssignee,
-        updatedAt: 'Now',
+        updatedAt: getCurrentTimeLabel(),
       };
 
       return {
@@ -241,7 +247,7 @@ export function useAppState() {
   const updateTicketStatus = useCallback((ticketId: string, status: TicketStatus) => {
     setState((current) => ({
       ...current,
-      tickets: current.tickets.map((ticket) => (ticket.id === ticketId ? { ...ticket, status, updatedAt: 'Now' } : ticket)),
+      tickets: current.tickets.map((ticket) => (ticket.id === ticketId ? { ...ticket, status, updatedAt: getCurrentTimeLabel() } : ticket)),
       itemCount: current.tickets.length,
     }));
   }, []);
