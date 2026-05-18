@@ -63,7 +63,11 @@ function AppShell() {
 
   const dashboardActions: Partial<Record<DashboardActionId, () => void>> = {
     'pause-1': actions.pauseQueue,
-    'restart-2': actions.restartQueue,
+    'restart-2': () => {
+      if (window.confirm('Restart the queue? This clears current ticket changes and restores the default dashboard.')) {
+        actions.restartQueue();
+      }
+    },
     'dashboard-1': () => navigateFromGenerated('dashboard-1'),
     'create-edit-2': () => navigateFromGenerated('create-edit-2'),
     'detail-3': () => navigateFromGenerated('detail-3'),
@@ -105,16 +109,16 @@ function AppShell() {
       case 'detail':
         return <Detail actions={workflowActions} />;
       case 'insights':
-        return <Insights actions={workflowActions} />;
+        return <Insights actions={workflowActions} tickets={state.tickets} />;
       case 'settings':
         return <Settings actions={settingsActions} />;
       case 'error-state':
-        return <ErrorState actions={workflowActions} />;
+        return <ErrorState actions={workflowActions} errorMessage={state.lastError} storageStatus={state.storageStatus} />;
       case 'empty-state':
-        return <EmptyState actions={workflowActions} />;
+        return <EmptyState actions={workflowActions} activeFilter={state.statusFilter} />;
       case 'dashboard':
       default:
-        return <Dashboard actions={dashboardActions} />;
+        return <Dashboard actions={dashboardActions} tickets={state.tickets} selectedTicketId={state.selectedTicketId} isPaused={state.isPaused} />;
     }
   };
 
